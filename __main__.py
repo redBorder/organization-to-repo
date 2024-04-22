@@ -9,7 +9,6 @@
 # Author: malvarez@redborder.com                                  #
 ###################################################################
 
-
 import logging
 from env.load import *
 from parsers.arg import ArgParser
@@ -22,13 +21,16 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 if __name__ == '__main__':
     args = ArgParser.parse_arguments()
-    repos = OrgToRepos(GitHubAPI(), args.organization)
+    github_api = GitHubAPI()
+    repos = OrgToRepos(github_api, args.organization)
     rpm_downloader = RpmDownloader()
+
     for repo in repos.repos:
         repo_name = RepoParser.repo_url_to_repo_name(repo)
         assets = repos.get_latest_assets_release(repo_name)
+
         if assets:
             for asset in assets:
                 logging.info(f"Downloading RPM from {asset}...")
                 rpm_downloader.download_and_move_rpm(asset)
-                logging.info(f"RPM downloaded and moved successfully.")
+                logging.info("RPM downloaded and moved successfully.")
