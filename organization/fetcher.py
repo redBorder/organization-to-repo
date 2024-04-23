@@ -9,21 +9,22 @@
 # Author: malvarez@redborder.com                                  #
 ###################################################################
 
+from organization.gitapi import GitHubAPI
 import requests, os
 
-class OrgToRepos:
+class OrgToRepos(GitHubAPI):
+    
     DISALLOW_REPO_LIST = os.getenv('DISALLOW_REPO_LIST').split(',')
     TOPIC = os.getenv('TOPIC')
-    
-    def __init__(self, api, organization):
+
+    def __init__(self, organization):
         """
         Initializes an OrgToRepos object.
 
         Args:
-        api (GitHubAPI): An instance of GitHubAPI for making API requests.
         organization (str): The name of the GitHub organization.
         """
-        self.api = api
+        super().__init__()
         self.organization = organization
         self.repos = []
         self.get_github_organization_repositories()
@@ -34,12 +35,12 @@ class OrgToRepos:
 
         Populates the 'repos' attribute with the URLs of the organization's repositories.
         """
-        url = f"{self.api.BASE_URL}orgs/{self.organization}/repos"
+        url = f"{self.BASE_URL}orgs/{self.organization}/repos"
         try:
             page = 1
             while True:
-                params = {'per_page': self.api.PER_PAGE, 'page': page}
-                repos = self.api.get(url, params=params)
+                params = {'per_page': self.PER_PAGE, 'page': page}
+                repos = self.get(url, params=params)
                 if not repos:
                     break
                 for repo in repos:
@@ -61,9 +62,9 @@ class OrgToRepos:
         list or None: A list of URLs of the assets, or None if no assets are found.
 
         """
-        url = f"{self.api.BASE_URL}repos/{self.organization}/{repo_name}/releases/latest"
+        url = f"{self.BASE_URL}repos/{self.organization}/{repo_name}/releases/latest"
         try:
-            release = self.api.get(url)
+            release = self.get(url)
             if 'message' in release and release['message'] == 'Not Found':
                 return None
             assets = release.get('assets', [])

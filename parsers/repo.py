@@ -12,6 +12,7 @@
 import re
 
 class RepoParser:
+    
     @staticmethod
     def repo_url_to_repo_name(url):
         """

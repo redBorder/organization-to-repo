@@ -13,6 +13,7 @@ import os
 import requests
 
 class FileDownloader:
+    
     DOWNLOAD_DIR = os.getenv("DOWNLOAD_DIR")
 
     def __init__(self):

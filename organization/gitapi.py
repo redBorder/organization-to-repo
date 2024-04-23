@@ -13,6 +13,7 @@ import os
 import requests
 
 class GitHubAPI:
+    
     BASE_URL = "https://api.github.com/"
     PER_PAGE = 100
     OAUTH_TOKEN = os.getenv("GITHUB_OAUTH_TOKEN")

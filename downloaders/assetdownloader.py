@@ -12,17 +12,15 @@
 from downloaders.filedownloader import FileDownloader
 import shutil, os, re
 
-class RpmDownloader:
+class RpmDownloader(FileDownloader):
+    
     def __init__(self):
         """
         Initializes an RpmDownloader object.
 
         This class provides methods to download and move RPM files.
-
-        Attributes:
-        file_downloader (FileDownloader): An instance of FileDownloader for downloading files.
         """
-        self.file_downloader = FileDownloader()
+        super().__init__()
 
     def download_and_move_rpm(self, url):
         """
@@ -31,7 +29,7 @@ class RpmDownloader:
         Args:
         url (str): The URL of the RPM file to download and move.
         """
-        file_name = self.file_downloader.download_file(url)
+        file_name = self.download_file(url)
         file_type, file_name = self.parse_asset(file_name)
         destination_folder = self.get_destination_folder(file_type)
         if file_type != "UNKNOWN":
