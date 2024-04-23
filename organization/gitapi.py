@@ -9,11 +9,13 @@
 # Author: malvarez@redborder.com                                  #
 ###################################################################
 
+import os
 import requests
 
 class GitHubAPI:
     BASE_URL = "https://api.github.com/"
     PER_PAGE = 100
+    OAUTH_TOKEN = os.getenv("GITHUB_OAUTH_TOKEN")
     
     def __init__(self):
         """
@@ -41,6 +43,7 @@ class GitHubAPI:
         Raises:
         requests.HTTPError: If the request fails.
         """
-        response = self.session.get(url, params=params)
+        headers = {'Authorization': f'token {self.OAUTH_TOKEN}'}
+        response = self.session.get(url, params=params, headers=headers)
         response.raise_for_status()
         return response.json()

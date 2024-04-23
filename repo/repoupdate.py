@@ -9,18 +9,23 @@
 # Author: malvarez@redborder.com                                  #
 ###################################################################
 
-import argparse
+import subprocess
 
-class ArgParser:
-    
+class RepoUpdater:
+
     @staticmethod
-    def parse_arguments():
+    def update_repo(repo_path):
         """
-        Parses command-line arguments.
+        Update the repository located at the specified path using createrepo command.
 
-        Returns:
-        argparse.Namespace: An object containing parsed arguments.
+        Args:
+            repo_path (str): The path to the repository.
+
+        Raises:
+            subprocess.CalledProcessError: If the command execution fails.
         """
-        parser = argparse.ArgumentParser(description="Fetch GitHub organization repositories and assets.")
-        parser.add_argument("organization", help="Name of the GitHub organization")
-        return parser.parse_args()
+        try:
+            subprocess.run(["createrepo", "--update", repo_path], check=True)
+            print(f"Repository at {repo_path} successfully updated.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error updating repository at {repo_path}: {e}")

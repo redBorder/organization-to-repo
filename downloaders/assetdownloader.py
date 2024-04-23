@@ -34,7 +34,8 @@ class RpmDownloader:
         file_name = self.file_downloader.download_file(url)
         file_type, file_name = self.parse_asset(file_name)
         destination_folder = self.get_destination_folder(file_type)
-        self.move_to_folder(file_name, destination_folder)
+        if file_type != "UNKNOWN":
+            self.move_to_folder(file_name, destination_folder)
 
     @staticmethod
     def parse_asset(file_name):

@@ -9,9 +9,12 @@
 # Author: malvarez@redborder.com                                  #
 ###################################################################
 
-import requests
+import requests, os
 
 class OrgToRepos:
+    DISALLOW_REPO_LIST = os.getenv('DISALLOW_REPO_LIST').split(',')
+    TOPIC = os.getenv('TOPIC')
+    
     def __init__(self, api, organization):
         """
         Initializes an OrgToRepos object.
@@ -32,7 +35,6 @@ class OrgToRepos:
         Populates the 'repos' attribute with the URLs of the organization's repositories.
         """
         url = f"{self.api.BASE_URL}orgs/{self.organization}/repos"
-        all_repo_urls = []
         try:
             page = 1
             while True:
@@ -40,13 +42,13 @@ class OrgToRepos:
                 repos = self.api.get(url, params=params)
                 if not repos:
                     break
-                repo_urls = [repo['html_url'] for repo in repos]
-                all_repo_urls.extend(repo_urls)
+                for repo in repos:
+                    if self.TOPIC in repo["topics"] and repo['name'] not in self.DISALLOW_REPO_LIST:
+                        self.repos.append(repo['html_url'])
                 page += 1
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
             return None
-        self.repos = all_repo_urls
     
     def get_latest_assets_release(self, repo_name):
         """
