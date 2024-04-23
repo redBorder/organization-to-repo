@@ -27,13 +27,16 @@ GITHUB_OAUTH_TOKEN=abcabcabc     # Your GitHub token
 DISALLOW_REPO_LIST=my-cool-repo  # List of repositories to exclude (use commas to exclude more repos)
 TOPIC=delivery                   # Topic of the repository to trigger the download
 ```
-DOWNLOAD_DIR: Path to store temporarily downloaded RPMs.
-SRC_RPMS_DIR: Directory to store source RPMs.
-x86_64_RPMS_DIR: Directory to store RPMs.
-GITHUB_OAUTH_TOKEN: Your GitHub token.
-DISALLOW_REPO_LIST: List of repositories to exclude (use commas to exclude more repos).
-TOPIC: Topic of the repository to trigger the download.
 
+```bash
+
+DOWNLOAD_DIR -> Path to store temporarily downloaded RPMs.
+SRC_RPMS_DIR -> Directory to store source RPMs.
+x86_64_RPMS_DIR -> Directory to store RPMs.
+GITHUB_OAUTH_TOKEN -> Your GitHub token.
+DISALLOW_REPO_LIST -> List of repositories to exclude (use commas to exclude more repos).
+TOPIC -> Topic of the repository to trigger the download.
+```
 ### Usage
 
 3 -. You can set-up this to run on your jenkins host like we do in redborder or you can just trigger 
