@@ -68,8 +68,8 @@ class OrgToRepos(GitHubAPI):
             if 'message' in release and release['message'] == 'Not Found':
                 return None
             assets = release.get('assets', [])
-            asset_urls = [asset['browser_download_url'] for asset in assets]
-            return asset_urls
+            asset_details = [{"id": asset["id"], "url": asset["browser_download_url"]} for asset in assets]
+            return asset_details
         except requests.exceptions.RequestException as e:
             print(f"An error occurred while fetching latest assets of {repo_name}: {e}")
             return None

@@ -22,19 +22,19 @@ class RpmDownloader(FileDownloader):
         """
         super().__init__()
 
-    def download_and_move_rpm(self, url):
+    def download_and_move_rpm(self, asset, organization, repo):
         """
         Downloads an RPM file from the specified URL and moves it to the appropriate destination folder.
 
         Args:
         url (str): The URL of the RPM file to download and move.
         """
-        file_name = self.download_file(url)
+        file_name = self.download_file(asset, organization, repo)
         file_type, file_name = self.parse_asset(file_name)
         destination_folder = self.get_destination_folder(file_type)
         if file_type != "UNKNOWN":
             self.move_to_folder(file_name, destination_folder)
-
+    
     @staticmethod
     def parse_asset(file_name):
         """

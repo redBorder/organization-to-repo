@@ -36,3 +36,26 @@ class RepoParser:
                 raise ValueError("Invalid GitHub URL")
         except Exception as e:
             return None
+        
+    @staticmethod
+    def parse_organization_and_repo(url):
+        """
+        Parses a GitHub URL to extract the organization and repository names.
+
+        Args:
+            url (str): The GitHub URL to parse.
+
+        Returns:
+            tuple: A tuple containing the organization name and repository name.
+
+        Raises:
+            ValueError: If the URL is not in a valid GitHub repository format.
+        """
+        pattern = r'^https:\/\/github\.com\/([^\/]+)\/([^\/]+)$'
+        match = re.match(pattern, url)
+        
+        if not match:
+            raise ValueError(f"Invalid GitHub URL: {url}")
+        
+        organization, repo = match.groups()
+        return organization, repo

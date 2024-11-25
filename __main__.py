@@ -43,10 +43,11 @@ def download_rpms(repos, rpm_downloader):
         logging.info(f"Downloading assets from {repo}")
         repo_name = RepoParser.repo_url_to_repo_name(repo)
         assets = repos.get_latest_assets_release(repo_name)
+        organization, repo = RepoParser.parse_organization_and_repo(repo)
         if assets:
             for asset in assets:
-                logging.info(f"Downloading RPM from {asset}...")
-                rpm_downloader.download_and_move_rpm(asset)
+                logging.info(f"Downloading RPM from {asset['url']}...")
+                rpm_downloader.download_and_move_rpm(asset, organization, repo)
                 logging.info("RPM downloaded and moved successfully.")
 
 def update_repo(repo_dir, repo_type):
