@@ -22,8 +22,8 @@ organization-to-repo is a tool designed to retrieve all released software from a
 
 ```plaintext
 DOWNLOAD_DIR=/tmp                # Where to download the RPMs temporarily
-SRC_RPMS_DIR=./src_rpms          # Where to store source RPMs
-x86_64_RPMS_DIR=./x86_rpms       # Where to store RPMs
+SRC_RPMS_DIR=/var/www/html/repo/rhel/9/SRPMS      # Where to store source RPMs (use an absolute path)
+x86_64_RPMS_DIR=/var/www/html/repo/rhel/9/x86_64  # Where to store RPMs (use an absolute path)
 GITHUB_OAUTH_TOKEN=abcabcabc     # Your GitHub token
 DISALLOW_REPO_LIST=my-cool-repo  # List of repositories to exclude (use commas to exclude more repos)
 TOPIC=delivery                   # Topic of the repository to trigger the download
