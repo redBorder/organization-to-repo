@@ -50,6 +50,48 @@ class RpmDownloader(FileDownloader):
     
         return self.move_to_folder(file_name, destination_folder)
 
+    def is_in_repo(self, asset):
+        """
+        Checks whether the RPM of an asset is already present in its repo folder.
+
+        The file is considered present when it exists in the destination folder
+        and, if GitHub reports the asset size, its size matches (so a truncated
+        copy is downloaded again).
+
+        Args:
+        asset (dict): GitHub release asset.
+
+        Returns:
+        bool: True if the RPM is already in the repo, False otherwise.
+        """
+        file_type, file_name = self.parse_asset(asset["name"])
+
+        if file_type == "UNKNOWN":
+            return False
+
+        destination_folder = self.get_destination_folder(file_type)
+
+        if not destination_folder:
+            return False
+
+        destination = os.path.join(destination_folder, file_name)
+
+        if not os.path.isfile(destination):
+            return False
+
+        expected_size = asset.get("size")
+
+        if expected_size is not None and os.path.getsize(destination) != expected_size:
+            logging.warning(
+                "RPM %s exists but its size differs from the release asset (%s != %s)",
+                destination,
+                os.path.getsize(destination),
+                expected_size,
+            )
+            return False
+
+        return True
+
     @staticmethod
     def parse_asset(file_name):
         """

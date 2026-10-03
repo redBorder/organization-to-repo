@@ -9,6 +9,7 @@
 # Author: malvarez@redborder.com                                  #
 ###################################################################
 
+import os
 import subprocess
 
 class RepoUpdater:
@@ -24,6 +25,8 @@ class RepoUpdater:
         Raises:
             subprocess.CalledProcessError: If the command execution fails.
         """
+        os.makedirs(repo_path, exist_ok=True)
+
         try:
             subprocess.run(["createrepo", "--update", repo_path], check=True)
             print(f"Repository at {repo_path} successfully updated.")

@@ -9,7 +9,7 @@
 # Author: malvarez@redborder.com                                  #
 ###################################################################
 
-import logging, os
+import logging, os, time
 from env.load import *
 from parsers.arg import ArgParser
 from parsers.repo import RepoParser
@@ -23,6 +23,8 @@ def main():
     """
     Main function to execute the program.
     """
+    start_time = time.monotonic()
+
     args = ArgParser.parse_arguments()
     repos = OrgToRepos(args.organization)
     rpm_downloader = RpmDownloader()
@@ -31,6 +33,9 @@ def main():
 
     update_repo(os.getenv('SRC_RPMS_DIR'), "SRC")
     update_repo(os.getenv('x86_64_RPMS_DIR'), "x86")
+
+    elapsed = int(time.monotonic() - start_time)
+    logging.info(f"Execution finished in {elapsed // 60}m {elapsed % 60}s")
 
 def download_rpms(repos, rpm_downloader):
     """
@@ -57,12 +62,16 @@ def download_rpms(repos, rpm_downloader):
                     logging.info(f"Skipping {file_name}: not an RPM file.")
                     continue
 
-                logging.info(f"Downloading RPM from {file_name}...")
-
                 asset = {
                     **asset,
                     "name": file_name,
                 }
+
+                if rpm_downloader.is_in_repo(asset):
+                    logging.info(f"Skipping {file_name}: already in the repo.")
+                    continue
+
+                logging.info(f"Downloading RPM from {file_name}...")
 
                 if rpm_downloader.download_and_move_rpm(
                     asset, organization, repo
