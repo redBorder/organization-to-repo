@@ -11,6 +11,11 @@
 
 from downloaders.filedownloader import FileDownloader
 import shutil, os, re
+import logging
+import os
+import shutil
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class RpmDownloader(FileDownloader):
     
@@ -23,18 +28,28 @@ class RpmDownloader(FileDownloader):
         super().__init__()
 
     def download_and_move_rpm(self, asset, organization, repo):
-        """
-        Downloads an RPM file from the specified URL and moves it to the appropriate destination folder.
-
-        Args:
-        url (str): The URL of the RPM file to download and move.
-        """
         file_name = self.download_file(asset, organization, repo)
-        file_type, file_name = self.parse_asset(file_name)
-        destination_folder = self.get_destination_folder(file_type)
-        if file_type != "UNKNOWN":
-            self.move_to_folder(file_name, destination_folder)
     
+        if not file_name:
+            logging.warning("RPM download returned no file name")
+            return False
+    
+        file_type, file_name = self.parse_asset(file_name)
+    
+        logging.info(
+            "Parsed RPM: file_name=%s, file_type=%s",
+            file_name,
+            file_type,
+        )
+    
+        if file_type == "UNKNOWN":
+            logging.warning("Unknown RPM type for file: %s", file_name)
+            return False
+    
+        destination_folder = self.get_destination_folder(file_type)
+    
+        return self.move_to_folder(file_name, destination_folder)
+
     @staticmethod
     def parse_asset(file_name):
         """
@@ -57,27 +72,44 @@ class RpmDownloader(FileDownloader):
     def get_destination_folder(file_type):
         """
         Gets the destination folder for moving the RPM file based on its type.
-
-        Args:
-        file_type (str): The type of the RPM file.
-
-        Returns:
-        str: The destination folder path.
         """
         if file_type == "SRC":
-            return os.getenv("SRC_RPMS_DIR")
-        return os.getenv("x86_64_RPMS_DIR")
-
+            destination_folder = os.getenv("SRC_RPMS_DIR")
+        else:
+            destination_folder = os.getenv("x86_64_RPMS_DIR")
+    
+        logging.info(
+            "Destination folder for file_type=%s: %s",
+            file_type,
+            destination_folder,
+        )
+    
+        return destination_folder
+   
     @staticmethod
     def move_to_folder(file_name, destination_folder):
-        """
-        Moves the RPM file to the specified destination folder.
-
-        Args:
-        file_name (str): The name of the RPM file.
-        destination_folder (str): The destination folder path.
-        """
+        source = os.path.join(FileDownloader.DOWNLOAD_DIR, file_name)
+        destination = os.path.join(destination_folder, file_name)
+    
+        logging.info("Moving RPM from %s to %s", source, destination)
+    
+        if not destination_folder:
+            logging.error("Destination folder is empty or not configured")
+            return False
+    
+        if not os.path.exists(source):
+            logging.error("Source RPM does not exist: %s", source)
+            return False
+    
         if not os.path.exists(destination_folder):
+            logging.info("Creating destination folder: %s", destination_folder)
             os.makedirs(destination_folder)
-        shutil.move(os.path.join(FileDownloader.DOWNLOAD_DIR, file_name), os.path.join(destination_folder, file_name))
-
+    
+        try:
+            shutil.move(source, destination)
+            logging.info("RPM moved successfully: %s", destination)
+            return True
+        except Exception:
+            logging.exception("Error moving RPM")
+            return False
+   

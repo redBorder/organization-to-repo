@@ -12,6 +12,9 @@
 import os
 import re
 import requests
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class FileDownloader:
     
@@ -31,34 +34,95 @@ class FileDownloader:
 
     def download_file(self, asset, organization, repo):
         """
-        Downloads a file from the specified URL.
+        Downloads an RPM file from a GitHub release.
+
+        Non-RPM assets are skipped without downloading them.
 
         Args:
-        url (str): The URL of the file to download.
+            asset (dict): GitHub release asset.
+            organization (str): GitHub organization.
+            repo (str): GitHub repository.
 
         Returns:
-        str: The name of the downloaded file.
-
-        Raises:
-        requests.HTTPError: If the download fails.
+            str | None: The name of the downloaded file, or None if the
+            asset is not an RPM.
         """
-        self.session.headers.update({"Authorization": f"token {self.GITHUB_TOKEN}"})
-        self.session.headers.update({"Accept": "application/octet-stream"})
+        file_name = asset.get("name")
 
-        url = f"https://api.github.com/repos/{organization}/{repo}/releases/assets/{asset['id']}"
-        pattern = r"https:\/\/github.com\/.+\/download\/.+\/((.+).rpm)"
+        logging.info(
+            "GitHub asset: name=%r, id=%r, browser_download_url=%r",
+            file_name,
+            asset.get("id"),
+            asset.get("browser_download_url"),
+        )
 
-        match = re.search(pattern, asset["url"])
+        # Skip assets without a name
+        if not file_name:
+            logging.warning(
+                "Skipping GitHub asset because it has no name: %r",
+                asset,
+            )
+            return None
 
-        if match:
-            file_name = match.group(1)
+        # Skip non-RPM assets
+        if not file_name.lower().endswith(".rpm"):
+            logging.warning(
+                "Skipping non-RPM asset: %r",
+                file_name,
+            )
+            return None
+
+        self.session.headers.update({
+            "Authorization": f"token {self.GITHUB_TOKEN}",
+            "Accept": "application/octet-stream",
+        })
+
+        url = (
+            f"https://api.github.com/repos/{organization}/{repo}"
+            f"/releases/assets/{asset['id']}"
+        )
+
+        logging.info(
+            "Downloading RPM from GitHub API: %s",
+            url,
+        )
 
         response = self.session.get(url, stream=True)
+
+        logging.info(
+            "GitHub response for %s: status=%s, content-type=%s",
+            file_name,
+            response.status_code,
+            response.headers.get("Content-Type"),
+        )
+
         response.raise_for_status()
+
         download_path = os.path.join(self.DOWNLOAD_DIR, file_name)
-        
-        with open(download_path, 'wb') as f:
+
+        logging.info(
+            "Saving RPM to: %s",
+            download_path,
+        )
+
+        with open(download_path, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
+                if chunk:
+                    f.write(chunk)
+
+        if not os.path.exists(download_path):
+            logging.error(
+                "RPM download completed but file does not exist: %s",
+                download_path,
+            )
+            return None
+
+        logging.info(
+            "RPM downloaded successfully: %s",
+            download_path,
+        )
 
         return file_name
+
+
+
