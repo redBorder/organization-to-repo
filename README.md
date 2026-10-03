@@ -12,8 +12,9 @@ organization-to-repo is a tool designed to retrieve all released software from a
 
 ### Configuration
 
-2. Open the .env file for configuration:
+2. Create your .env file from the example and edit it (.env is ignored by git, so your token is never committed):
     ```bash
+    cp .env.example .env
     vim .env
     ```
     
